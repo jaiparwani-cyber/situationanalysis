@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Universal Situation Analysis Pipeline</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.12);
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #38bdf8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Inter, Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 24px;
+    }
+
+    h1, h2, h3 {
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      color: #ffffff;
+      font-size: 2rem;
+    }
+
+    h2 {
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      margin-top: 4px;
+      padding-bottom: 8px;
+    }
+
+    h3 {
+      color: #cbd5e1;
+      margin-top: 16px;
+    }
+
+    p {
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    ul {
+      color: var(--muted);
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      overflow: hidden;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--panel);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    td {
+      color: var(--muted);
+      min-height: 42px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 8px;
+      padding: 12px;
+      resize: vertical;
+    }
+
+    button {
+      background: var(--accent);
+      color: #052e16;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      margin: 12px 8px 0 0;
+      padding: 10px 16px;
+    }
+
+    .container {
+      max-width: 1500px;
+      margin: auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 18px;
+      padding: 20px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .pipeline {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin-top: 18px;
+    }
+
+    .step {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      min-height: 84px;
+      padding: 14px;
+    }
+
+    .step span,
+    .tag {
+      color: var(--accent);
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .note {
+      background: var(--accent-soft);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      border-radius: 8px;
+      color: #bbf7d0;
+      margin-top: 14px;
+      padding: 12px;
+    }
+
+    .matrix {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      margin-top: 16px;
+    }
+
+    .quadrant {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .strength h3 { color: var(--accent); }
+    .weakness h3 { color: var(--warning); }
+    .opportunity h3 { color: var(--info); }
+    .threat h3 { color: var(--danger); }
+
+    .footer {
+      color: var(--muted);
+      padding: 26px 0 8px;
+      text-align: center;
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        color: #111827;
+      }
+
+      .card, textarea, th, td {
+        background: #ffffff;
+        color: #111827;
+      }
+
+      button {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="card">
+      <h1>Universal Strategic Situation Analysis System</h1>
+      <p>
+        A guided analytical workflow for moving from situation definition to evidence-based strategy.
+        Each stage defines what to collect, how to analyze it, how to interpret the result, and when to move forward.
+      </p>
+      <ul>
+        <li><strong>Purpose</strong> - why the stage exists.</li>
+        <li><strong>Required Inputs</strong> - what data, observations, or documents are needed.</li>
+        <li><strong>Collection Methods</strong> - how to gather the information.</li>
+        <li><strong>Analysis Logic</strong> - how to structure and evaluate the evidence.</li>
+        <li><strong>Interpretation Guidance</strong> - how to understand what the evidence means.</li>
+        <li><strong>Transition Rule</strong> - how the output feeds the next stage.</li>
+      </ul>
+      <p class="note">
+        SWOT is treated as a synthesized strategic output, not a starting framework.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Pipeline Flow</h2>
+      <div class="pipeline">
+        <div class="step"><span>Step 1</span>Situation Definition</div>
+        <div class="step"><span>Step 2</span>External Environment Analysis</div>
+        <div class="step"><span>Step 3</span>Stakeholder Mapping</div>
+        <div class="step"><span>Step 4</span>Market / Ecosystem Mapping</div>
+        <div class="step"><span>Step 5</span>Business / System Model</div>
+        <div class="step"><span>Step 6</span>Operational Value Flow</div>
+        <div class="step"><span>Step 7</span>Metrics &amp; Unit Economics</div>
+        <div class="step"><span>Step 8</span>Strategic Diagnosis</div>
+        <div class="step"><span>Output</span>SWOT + Action Strategy</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="tag">Step 1</div>
+      <h2>Situation Definition</h2>
+      <h3>Purpose</h3>
+      <p>Define the decision context, problem boundary, desired outcome, and analytical scope before collecting evidence.</p>
+      <h3>Required Inputs</h3>
+      <ul>
+        <li>Problem statement, decision question, and success criteria.</li>
+        <li>Known symptoms, constraints, assumptions, and unresolved questions.</li>
+        <li>Time horizon, geography, organizational boundary, and affected users or units.</li>
+      </ul>
+      <h3>Collection Methods</h3>
+      <ul>
+        <li>Leadership interviews, intake workshops, document review, and initial observation.</li>
+        <li>5W1H framing: what, who, where, when, why, and how.</li>
+      </ul>
+      <h3>Analysis Logic</h3>
+      <p>Separate symptoms from the core decision, define what is inside and outside scope, and list hypotheses to test downstream.</p>
+      <h3>Interpretation Guidance</h3>
+      <p>A strong definition explains the situation clearly enough that different analysts would investigate the same problem.</p>
+      <h3>Transition Rule</h3>
+      <p>Move to external environment analysis once the question, scope, and decision criteria are explicit.</p>
+      <div class="grid grid-2">
+        <div>
+          <h3>Problem Frame</h3>
+          <textarea placeholder="What is the situation, decision, or problem to analyze?"></textarea>
+        </div>
+        <div>
+          <h3>Scope &amp; Success Criteria</h3>
+          <textarea placeholder="Boundary, time horizon, target outcome, and what success would look like."></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="tag">Step 2</div>
+      <h2>External Environment Analysis</h2>
+      <h3>Purpose</h3>
+      <p>Identify the external forces that shape the situation before mapping people, institutions, and markets.</p>
+      <h3>Required Inputs</h3>
+      <ul>
+        <li>Regulatory, economic, social, technological, political, and environmental signals.</li>
+        <li>Industry trends, policy changes, funding conditions, geographic realities, and emerging risks.</li>
+      </ul>
+      <h3>Collection Methods</h3>
+      <ul>
+        <li>Desk research, market reports, policy scans, expert interviews, news review, and community signals.</li>
+        <li>Macro, meso, and micro context mapping.</li>
+      </ul>
+      <h3>Analysis Logic</h3>
+      <p>Classify external forces by relevance, direction of impact, certainty, timing, and intensity.</p>
+      <h3>Interpretation Guidance</h3>
+      <p>Focus on forces that change incentives, constraints, demand, cost, legitimacy, adoption, or risk exposure.</p>
+      <h3>Transition Rule</h3>
+      <p>Move to stakeholder mapping once the major external pressures and context boundaries are visible.</p>
+      <div class="grid grid-3">
+        <div>
+          <h3>Macro</h3>
+          <textarea placeholder="Policy, economy, demographics, technology, regulation, climate, capital markets."></textarea>
+        </div>
+        <div>
+          <h3>Meso</h3>
+          <textarea placeholder="Industry structure, supply chains, institutions, channels, competitors, standards."></textarea>
+        </div>
+        <div>
+          <h3>Micro</h3>
+          <textarea placeholder="Local behavior, field constraints, team realities, customer context, operational friction."></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="tag">Step 3</div>
+      <h2>Stakeholder Mapping</h2>
+      <h3>Purpose</h3>
+      <p>Identify all individuals, organizations, institutions, and groups that influence or are influenced by the system.</p>
+      <h3>Required Inputs</h3>
+      <ul>
+        <li>Customer groups, users, beneficiaries, internal teams, suppliers, partners, regulators, investors, communities, and competitors.</li>
+        <li>Known formal authority, informal influence, incentives, dependencies, conflicts, and relationship links.</li>
+      </ul>
+      <h3>Collection Methods</h3>
+      <ul>
+        <li>Interviews, org charts, supply chain mapping, community research, partnership analysis, and field observation.</li>
+        <li>Relationship tracing: who funds, approves, blocks, adopts, delivers, regulates, or depends on whom.</li>
+      </ul>
+      <h3>Analysis Logic</h3>
+      <p>
+        Classify stakeholders by power, influence, dependency, risk/conflict, and relationship position.
+        Map how stakeholders affect each other, not just how they affect the focal organization.
+      </p>
+      <h3>Interpretation Guidance</h3>
+      <p>
+        High-power stakeholders can authorize or block change. High-influence stakeholders shape beliefs and adoption.
+        High-dependency stakeholders carry exposure if the system fails. Conflict risk highlights resistance, misaligned incentives, or governance gaps.
+      </p>
+      <h3>Transition Rule</h3>
+      <p>Move to market / ecosystem mapping when the stakeholder network, power structure, dependency chain, blockers, and enablers are visible.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Stakeholder</th>
+            <th>Role</th>
+            <th>Power</th>
+            <th>Influence</th>
+            <th>Dependency</th>
+            <th>Risk / Conflict</th>
+            <th>Relationships</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td contenteditable="true">Customer / User</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true">High / Medium / Low</td>
+            <td contenteditable="true">High / Medium / Low</td>
+            <td contenteditable="true">High / Medium / Low</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td contenteditable="true">Regulator / Gatekeeper</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true">High</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td contenteditable="true">Partner / Supplier</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+          </tr>
+        </tbody>
+      </table>
+      <h3>Stakeholder Network Notes</h3>
+      <textarea placeholder="Power centers, influence pathways, dependency chains, conflicts, coalition opportunities, and missing stakeholders."></textarea>
+    </section>
+
+    <section class="card">
+      <div class="tag">Step 4</div>
+      <h2>Market / Ecosystem Mapping</h2>
+      <h3>Purpose</h3>
+      <p>Map the broader system of actors, alternatives, channels, complements, substitutes, and institutional forces around the stakeholders.</p>
+      <h3>Required Inputs</h3>
+      <ul>
+        <li>Competitors, substitutes, complements, customers, suppliers, partners, distribution channels, institutions, and platforms.</li>
+        <li>Market size indicators, adoption patterns, switching behavior, channel economics, and ecosystem bottlenecks.</li>
+      </ul>
+      <h3>Collection Methods</h3>
+      <ul>
+        <li>Competitor benchmarking, user interviews, app reviews, community analysis, desk research, and channel mapping.</li>
+      </ul>
+      <h3>Analysis Logic</h3>
+      <p>Identify actor roles, dependencies, flows of value, points of control, competitive pressure, and ecosystem gaps.</p>
+      <h3>Interpretation Guidance</h3>
+      <p>Look for where power accumulates, where dependency creates fragility, and where unserved needs or structural openings appear.</p>
+      <h3>Transition Rule</h3>
+      <p>Move to business / system model analysis after the external actor landscape and ecosystem mechanics are mapped.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Actor</th>
+            <th>Role</th>
+            <th>Dependency</th>
+            <th>Influence</th>
+            <th>Competitive / System Risk</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <div class="tag">Step 5</div>
+      <h2>Business / System Model</h2>
+      <h3>Purpose</h3>
+      <p>Explain how the entity or system creates, delivers, captures, funds, governs, and scales value.</p>
+      <h3>Required Inputs</h3>
+      <ul>
+        <li>Offer, customer segments, channels, revenue model, cost structure, partners, capabilities, incentives, and governance model.</li>
+        <li>Evidence from stakeholder and ecosystem mapping about adoption, trust, access, and constraints.</li>
+      </ul>
+      <h3>Collection Methods</h3>
+      <ul>
+        <li>Business model canvas review, operating documents, financial review, interviews, customer journey analysis, and process walkthroughs.</li>
+      </ul>
+      <h3>Analysis Logic</h3>
+      <p>Test whether value creation, delivery, capture, and governance reinforce each other or work against each other.</p>
+      <h3>Interpretation Guidance</h3>
+      <p>A model is weak when users value the offer but incentives, channels, costs, trust, or governance prevent repeatable delivery.</p>
+      <h3>Transition Rule</h3>
+      <p>Move to operational value flow once the model logic is clear enough to trace how work and value actually move.</p>
+      <div class="grid grid-2">
+        <div>
+          <h3>Model Logic</h3>
+          <textarea placeholder="Who receives value, who pays, who delivers, who governs, and why the model should work."></textarea>
+        </div>
+        <div>
+          <h3>Model Weak Points</h3>
+          <textarea placeholder="Adoption, trust, unit economics, channel, capability, incentive, funding, or governance weaknesses."></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="tag">Step 6</div>
+      <h2>Operational Value Flow</h2>
+      <h3>Purpose</h3>
+      <p>Map where value is created, transferred, delayed, lost, duplicated, or captured in the actual operating workflow.</p>
+      <h3>Required Inputs</h3>
+      <ul>
+        <li>Process stages, handoffs, actors, inputs, outputs, cycle times, errors, rework, and bottlenecks.</li>
+      </ul>
+      <h3>Collection Methods</h3>
+      <ul>
+        <li>Workflow observation, service blueprinting, process mining, interviews, ticket review, and time-motion analysis.</li>
+      </ul>
+      <h3>Analysis Logic</h3>
+      <p>Trace each stage from trigger to outcome and mark where value rises, falls, waits, leaks, or becomes expensive.</p>
+      <h3>Interpretation Guidance</h3>
+      <p>Operational issues often reveal why an otherwise logical strategy fails in practice.</p>
+      <h3>Transition Rule</h3>
+      <p>Move to metrics and unit economics when the workflow is concrete enough to measure cost, speed, quality, and return.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Stage</th>
+            <th>Actor</th>
+            <th>Input</th>
+            <th>Output</th>
+            <th>Value Added</th>
+            <th>Loss / Bottleneck</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td contenteditable="true">Acquire / Intake</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td contenteditable="true">Deliver / Operate</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td contenteditable="true">Retain / Improve</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <div class="tag">Step 7</div>
+      <h2>Metrics &amp; Unit Economics</h2>
+      <h3>Purpose</h3>
+      <p>Convert the mapped system into measurable performance, cost, value, risk, and sustainability indicators.</p>
+      <h3>Required Inputs</h3>
+      <ul>
+        <li>Volumes, conversion rates, retention, revenue, contribution margin, cost drivers, cycle time, quality, risk events, and capacity.</li>
+      </ul>
+      <h3>Collection Methods</h3>
+      <ul>
+        <li>Financial data, analytics exports, CRM or ERP data, operational logs, surveys, and manual sampling.</li>
+      </ul>
+      <h3>Analysis Logic</h3>
+      <p>Connect metrics to the business/system model and value flow, then identify which numbers explain performance rather than merely describe it.</p>
+      <h3>Interpretation Guidance</h3>
+      <p>Metrics matter most when they reveal leverage: which driver changes outcomes, margins, reliability, adoption, or strategic viability.</p>
+      <h3>Transition Rule</h3>
+      <p>Move to strategic diagnosis once evidence, model logic, operational flow, and performance economics can be compared.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Baseline</th>
+            <th>Driver</th>
+            <th>Target</th>
+            <th>Data Source</th>
+            <th>Interpretation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td contenteditable="true">Revenue / Outcome per unit</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td contenteditable="true">Cost per unit</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td contenteditable="true">Cycle time / Quality</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <div class="tag">Step 8</div>
+      <h2>Strategic Diagnosis</h2>
+      <h3>Purpose</h3>
+      <p>Synthesize all prior evidence into the core diagnosis: what is really happening, why it matters, and where intervention has leverage.</p>
+      <h3>Required Inputs</h3>
+      <ul>
+        <li>Situation definition, external forces, stakeholder map, ecosystem map, model logic, value flow, and metrics.</li>
+        <li>Contradictions, bottlenecks, structural advantages, constraints, risks, and unresolved uncertainties.</li>
+      </ul>
+      <h3>Collection Methods</h3>
+      <ul>
+        <li>Synthesis workshop, root-cause analysis, constraint diagnosis, decision matrix, scenario analysis, and expert review.</li>
+      </ul>
+      <h3>Analysis Logic</h3>
+      <p>Distinguish symptoms from structural causes, rank constraints by severity and fixability, and identify strategic choices.</p>
+      <h3>Interpretation Guidance</h3>
+      <p>A good diagnosis names the few issues that explain many observations and clarifies what should change first.</p>
+      <h3>Transition Rule</h3>
+      <p>Move to SWOT + action strategy once the diagnosis can support concrete strategic choices and prioritized interventions.</p>
+      <div class="grid grid-2">
+        <div>
+          <h3>Root Cause / Constraint Chain</h3>
+          <textarea placeholder="Main constraints, 5 Whys, systemic causes, and evidence strength."></textarea>
+        </div>
+        <div>
+          <h3>Strategic Insight</h3>
+          <textarea placeholder="The core insight that should change decision-making."></textarea>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Strategic Option</th>
+            <th>Impact</th>
+            <th>Effort</th>
+            <th>Risk</th>
+            <th>Cost</th>
+            <th>Priority</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td contenteditable="true"></td>
+            <td contenteditable="true">High / Medium / Low</td>
+            <td contenteditable="true">High / Medium / Low</td>
+            <td contenteditable="true">High / Medium / Low</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <div class="tag">Output</div>
+      <h2>SWOT + Action Strategy</h2>
+      <h3>Purpose</h3>
+      <p>Convert the strategic diagnosis into a concise decision narrative, SWOT synthesis, action plan, owners, and monitoring logic.</p>
+      <h3>Required Inputs</h3>
+      <ul>
+        <li>Validated evidence from all eight stages, prioritized constraints, strategic options, and decision criteria.</li>
+      </ul>
+      <h3>Collection Methods</h3>
+      <ul>
+        <li>Synthesis review, leadership alignment, action planning, KPI selection, and owner assignment.</li>
+      </ul>
+      <h3>Analysis Logic</h3>
+      <p>Translate internal evidence into strengths and weaknesses, external evidence into opportunities and threats, then convert priorities into action.</p>
+      <h3>Interpretation Guidance</h3>
+      <p>SWOT is useful only when each quadrant is backed by evidence and leads to a decision, intervention, or monitoring metric.</p>
+      <h3>Transition Rule</h3>
+      <p>Finalize when each action has an owner, expected behavior change, success metric, and review cadence.</p>
+      <div class="matrix">
+        <div class="quadrant strength">
+          <h3>Strengths</h3>
+          <textarea placeholder="Internal advantages validated by evidence."></textarea>
+        </div>
+        <div class="quadrant weakness">
+          <h3>Weaknesses</h3>
+          <textarea placeholder="Internal structural weaknesses validated by evidence."></textarea>
+        </div>
+        <div class="quadrant opportunity">
+          <h3>Opportunities</h3>
+          <textarea placeholder="External leverage points, unmet needs, openings, and growth vectors."></textarea>
+        </div>
+        <div class="quadrant threat">
+          <h3>Threats</h3>
+          <textarea placeholder="External risks, competition, substitutes, regulation, instability, and blockers."></textarea>
+        </div>
+      </div>
+      <h3>Action Strategy</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Problem / Opportunity</th>
+            <th>Action</th>
+            <th>Stakeholder Owner</th>
+            <th>Expected Change</th>
+            <th>Success Metric</th>
+            <th>Review Cadence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true">30 / 60 / 90 days</td>
+          </tr>
+        </tbody>
+      </table>
+      <h3>Executive Summary</h3>
+      <textarea placeholder="Summarize the situation, diagnosis, strategic choice, action plan, and monitoring approach."></textarea>
+      <button onclick="saveData()">Save Locally</button>
+      <button onclick="loadData()">Load Saved Data</button>
+      <button onclick="window.print()">Export PDF</button>
+    </section>
+
+    <div class="footer">
+      Universal Situation Analysis Pipeline - Diagnostic -> Strategic -> Execution Framework
+    </div>
+  </div>
+
+  <script>
+    function saveData() {
+      const fields = document.querySelectorAll('textarea, input');
+      const editable = document.querySelectorAll('[contenteditable="true"]');
+      const data = { fields: [], editable: [] };
+
+      fields.forEach(field => {
+        data.fields.push(field.value);
+      });
+
+      editable.forEach(cell => {
+        data.editable.push(cell.innerText);
+      });
+
+      localStorage.setItem('situation-analysis-template', JSON.stringify(data));
+      alert('Saved locally.');
+    }
+
+    function loadData() {
+      const saved = localStorage.getItem('situation-analysis-template');
+
+      if (!saved) {
+        alert('No saved data found.');
+        return;
+      }
+
+      const data = JSON.parse(saved);
+      const fields = document.querySelectorAll('textarea, input');
+      const editable = document.querySelectorAll('[contenteditable="true"]');
+
+      fields.forEach((field, index) => {
+        if (data.fields[index] !== undefined) {
+          field.value = data.fields[index];
+        }
+      });
+
+      editable.forEach((cell, index) => {
+        if (data.editable[index] !== undefined) {
+          cell.innerText = data.editable[index];
+        }
+      });
+
+      alert('Loaded saved data.');
+    }
+  </script>
+</body>
+</html>
